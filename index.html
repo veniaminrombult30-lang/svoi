@@ -1,1 +1,191 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#12152b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Свої</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#12152b;--panel:#1a1e3c;--me1:#6a5cff;--me2:#4d8bff;--them:#252a50;--text:#f1f2ff;--dim:#8087b8;--line:#272c55}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:16px/1.35 Manrope,system-ui,sans-serif;overflow:hidden}
+.screen{display:none;height:100%;flex-direction:column}
+.screen.on{display:flex}
+#login{align-items:center;justify-content:center;padding:28px;gap:12px;background:radial-gradient(circle at 50% 0,#2a2470 0,var(--bg) 60%)}
+.logo{width:84px;height:84px;border-radius:26px;background:linear-gradient(135deg,var(--me1),var(--me2));display:grid;place-items:center;font-size:42px;font-weight:800;box-shadow:0 12px 40px rgba(90,100,255,.45);margin-bottom:10px}
+#login h1{font-size:34px;font-weight:800;letter-spacing:-.5px;margin-bottom:14px}
+#login .box{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px}
+input{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:16px;padding:15px 16px;font:inherit;width:100%;outline:none;font-size:16px}
+input:focus{border-color:var(--me2)}
+.btn{background:linear-gradient(135deg,var(--me1),var(--me2));color:#fff;border:0;border-radius:16px;padding:15px;font:inherit;font-weight:800;cursor:pointer}
+.btn:disabled{opacity:.5}
+#err{color:#ff8f9f;font-size:13px;min-height:18px;text-align:center}
+header{display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:rgba(26,30,60,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hl{width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,var(--me1),var(--me2));display:grid;place-items:center;font-weight:800;font-size:20px}
+header .t{flex:1}header b{display:block;font-size:17px}
+header small{color:var(--dim);font-size:12px}
+.ib{background:transparent;border:0;color:var(--dim);padding:8px;border-radius:12px;cursor:pointer;font-size:20px}
+#msgs{flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overscroll-behavior:contain}
+.day{align-self:center;color:var(--dim);font-size:12px;background:var(--panel);padding:3px 12px;border-radius:20px;margin:10px 0 6px}
+.row{display:flex;align-items:flex-end;gap:8px;margin-top:6px}
+.row.me{justify-content:flex-end}
+.row.cont{margin-top:1px}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;flex:none}
+.av.gap{visibility:hidden}
+.m{max-width:78%;padding:8px 12px 6px;border-radius:20px;background:var(--them);word-wrap:break-word;white-space:pre-wrap}
+.row:not(.me):not(.cont) .m{border-bottom-left-radius:6px}
+.row.me .m{background:linear-gradient(135deg,var(--me1),var(--me2));border-bottom-right-radius:6px}
+.m .n{display:block;font-size:12px;font-weight:800;margin-bottom:1px}
+.m .t{font-size:10.5px;color:rgba(255,255,255,.55);margin-left:10px;float:right;margin-top:6px}
+.empty{margin:auto;color:var(--dim);font-size:15px}
+form{display:flex;align-items:flex-end;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line)}
+form input{border-radius:22px;padding:12px 16px}
+#send{width:46px;height:46px;border-radius:50%;border:0;flex:none;background:linear-gradient(135deg,var(--me1),var(--me2));display:grid;place-items:center;cursor:pointer}
+#send svg{width:22px;height:22px;fill:#fff;margin-left:2px}
+</style>
+</head>
+<body>
+
+<section id="login" class="screen on">
+  <div class="logo">С</div>
+  <h1>Свої</h1>
+  <div class="box">
+    <input id="name" placeholder="Імʼя" maxlength="20" autocomplete="off">
+    <input id="pass" type="password" placeholder="Код кімнати" autocomplete="off">
+    <button class="btn" id="go">Увійти</button>
+    <div id="err"></div>
+  </div>
+</section>
+
+<section id="chat" class="screen">
+  <header>
+    <div class="hl">С</div>
+    <div class="t"><b>Свої</b><small>🔒 приватний чат</small></div>
+    <button class="ib" id="out" title="Вийти">⏻</button>
+  </header>
+  <div id="msgs"><div class="empty">Напиши перше повідомлення</div></div>
+  <form id="f">
+    <input id="txt" placeholder="Повідомлення" autocomplete="off">
+    <button id="send" aria-label="Надіслати"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+  </form>
+</section>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,signInAnonymously} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,addDoc,query,orderBy,limit,onSnapshot,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAFqGLrdTYcxsQ5Cu4zQ1oHE_6Nuwh7FlM",
+  authDomain: "messenger-406b1.firebaseapp.com",
+  projectId: "messenger-406b1",
+  appId: "1:752627937145:web:9132781d700ff2f69a89a8"
+};
+
+const $ = id => document.getElementById(id);
+const enc = new TextEncoder(), dec = new TextDecoder();
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+let key, roomId, me, db, unsub;
+
+async function derive(pass){
+  const base = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey","deriveBits"]);
+  key = await crypto.subtle.deriveKey({name:"PBKDF2", salt:enc.encode("svoi-key-v1"), iterations:200000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+  const bits = await crypto.subtle.deriveBits({name:"PBKDF2", salt:enc.encode("svoi-room-v1"), iterations:200000, hash:"SHA-256"}, base, 128);
+  roomId = [...new Uint8Array(bits)].map(x => x.toString(16).padStart(2,"0")).join("");
+}
+async function encrypt(obj){
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, enc.encode(JSON.stringify(obj)));
+  return {iv:b64(iv), c:b64(ct)};
+}
+async function decrypt(d){
+  try{
+    const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:unb64(d.iv)}, key, unb64(d.c));
+    return JSON.parse(dec.decode(pt));
+  }catch{ return null; }
+}
+const hue = s => { let h = 0; for(const c of s) h = (h*31 + c.charCodeAt(0)) % 360; return h; };
+function show(id){ document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id)); }
+
+async function enter(name, pass){
+  $("err").textContent = ""; $("go").disabled = true;
+  try{
+    const app = initializeApp(firebaseConfig);
+    await signInAnonymously(getAuth(app));
+    db = getFirestore(app);
+    await derive(pass);
+    me = name;
+    localStorage.setItem("svoi", JSON.stringify({name, pass}));
+    show("chat");
+    listen();
+  }catch(e){
+    $("err").textContent = "Не вдалось увійти. Перевір інтернет.";
+  }finally{ $("go").disabled = false; }
+}
+
+function listen(){
+  const q = query(collection(db, "rooms", roomId, "msgs"), orderBy("t"), limit(300));
+  unsub = onSnapshot(q, async snap => {
+    const box = $("msgs");
+    const stick = box.scrollHeight - box.scrollTop - box.clientHeight < 100;
+    const items = await Promise.all(snap.docs.map(async d => ({data: await decrypt(d.data()), t: d.data().t})));
+    const ok = items.filter(i => i.data);
+    box.innerHTML = "";
+    if(!ok.length){ box.innerHTML = '<div class="empty">Напиши перше повідомлення</div>'; return; }
+    let prev = null, prevDay = "";
+    for(const {data, t} of ok){
+      const date = t ? t.toDate() : new Date();
+      const day = date.toLocaleDateString("uk-UA", {day:"numeric", month:"long"});
+      if(day !== prevDay){ const d = document.createElement("div"); d.className = "day"; d.textContent = day; box.append(d); prevDay = day; prev = null; }
+      const mine = data.n === me, cont = prev === data.n;
+      const row = document.createElement("div");
+      row.className = "row" + (mine ? " me" : "") + (cont ? " cont" : "");
+      const col = `hsl(${hue(data.n)} 70% 62%)`;
+      if(!mine){
+        const av = document.createElement("div");
+        av.className = "av" + (cont ? " gap" : "");
+        av.style.background = `hsl(${hue(data.n)} 55% 30%)`; av.style.color = col;
+        av.textContent = data.n[0].toUpperCase();
+        row.append(av);
+      }
+      const m = document.createElement("div"); m.className = "m";
+      if(!mine && !cont){ const n = document.createElement("span"); n.className = "n"; n.style.color = col; n.textContent = data.n; m.append(n); }
+      m.append(document.createTextNode(data.x));
+      const tm = document.createElement("span"); tm.className = "t";
+      tm.textContent = date.toLocaleTimeString("uk-UA", {hour:"2-digit", minute:"2-digit"});
+      m.append(tm); row.append(m); box.append(row);
+      prev = data.n;
+    }
+    if(stick) box.scrollTop = box.scrollHeight;
+  }, () => { $("msgs").innerHTML = '<div class="empty">Немає доступу до чату</div>'; });
+}
+
+$("go").onclick = () => {
+  const n = $("name").value.trim(), p = $("pass").value;
+  if(!n || p.length < 6){ $("err").textContent = "Імʼя і код від 6 символів"; return; }
+  enter(n, p);
+};
+$("f").onsubmit = async e => {
+  e.preventDefault();
+  const x = $("txt").value.trim(); if(!x) return;
+  $("txt").value = ""; $("txt").focus();
+  try{
+    const p = await encrypt({n:me, x});
+    await addDoc(collection(db, "rooms", roomId, "msgs"), {...p, t: serverTimestamp()});
+  }catch{ $("txt").value = x; }
+};
+$("out").onclick = () => { localStorage.removeItem("svoi"); if(unsub) unsub(); location.reload(); };
+
+try{
+  const s = JSON.parse(localStorage.getItem("svoi") || "null");
+  if(s){ $("name").value = s.name; $("pass").value = s.pass; enter(s.name, s.pass); }
+}catch{}
+</script>
+</body>
+</html>
 
